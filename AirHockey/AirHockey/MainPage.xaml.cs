@@ -26,5 +26,13 @@ namespace AirHockey
         {
             this.InitializeComponent();
         }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            // Navigate to the appropriate destination page, configuring the new page
+            // by passing required information as a navigation parameter
+            //var itemId = new GamePage();
+            this.Frame.Navigate(typeof(GamePage), null);
+        }
     }
 }

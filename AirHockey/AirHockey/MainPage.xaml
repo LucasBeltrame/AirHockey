@@ -8,6 +8,25 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <CheckBox x:Name="checkBox" Content="CheckBox" HorizontalAlignment="Left" Height="3" Margin="257,1932,0,-1295" VerticalAlignment="Top" Width="43"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="6"/>
+        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="127,152,0,0" VerticalAlignment="Top" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="6" Click="button_Click"/>
 
     </Grid>
 </Page>
