@@ -55,22 +55,35 @@ namespace AirHockey
         private Vec2 newP1Pos;
         private Vec2 newP2Pos;
 
+        //Attributs liés au jeu de manière généale
+        private Palet palet;
+        private Vec2 paletInitalPos;
+        private Body[] borduresBodies;
 
 
 
+        /// <summary>
+        /// Constructeur
+        /// </summary>
         public GamePage()
         {
             this.InitializeComponent();
-            InitializePhysics();
-
             width = 400.0f;
             height = 800.0f;
-            
+
+            InitializePhysics();
+            InitialiseBordure();
+            //Joueurs
             joueur1 = new PoussoirJoueur(world,width/2, 0,1);
             joueur2 = new PoussoirJoueur(world, width / 2, 100, 2);
             newP1Pos = joueur1.Pos;
             newP2Pos = joueur2.Pos;
 
+            //Palet
+            palet = new Palet(world,width/2,height/2);
+            paletInitalPos = palet.Pos;
+
+            //Tâche
             executionAction = GameExecution;
             executionTask = new Task(executionAction);
             executionTask.Start();
@@ -100,6 +113,7 @@ namespace AirHockey
             args.DrawingSession.DrawEllipse(width/2, height/2,radiusCentralCircle, radiusCentralCircle, Color.FromArgb(255,255,0,0));
 
             /* Palet */
+            palet.Draw(args.DrawingSession);
 
             /* Joueurs */
             joueur1.Draw(args.DrawingSession);
@@ -107,16 +121,53 @@ namespace AirHockey
         }
 
         /// <summary>
-        /// Regroupe les initialisations liées à Farseer
+        /// Regroupe les initialisations liées à Box2DX
         /// </summary>
         private void InitializePhysics()
         {
-            AABB world_AABB = new AABB();
-            world_AABB.LowerBound = new Vec2(-100.0f,-100.0f);
-            world_AABB.UpperBound = new Vec2(8000.0f,8000.0f);
-            world = new World(world_AABB, new Vec2(0.0f,0.0f), false);
+            //Création du monde
+            AABB worldAABB = new AABB();
+            worldAABB.LowerBound = new Vec2(-100.0f,-100.0f);
+            worldAABB.UpperBound = new Vec2(8000.0f,8000.0f);
+            world = new World(worldAABB, new Vec2(0.0f,0.0f), true);
+        }
 
+        private void InitialiseBordure()
+        {
+            Vec2[] vertices = new Vec2[4];
+            borduresBodies = new Body[4];
 
+            //Création des bordures du monde
+            BodyDef boundaryDef = new BodyDef();
+            boundaryDef.MassData.I = 0.0f;
+            boundaryDef.MassData.Mass = 0.0f;
+
+            //Haut
+            InitialisationBordure(borduresBodies[0],width/2,0.0f,width,1.0f);
+
+            //Droite
+            InitialisationBordure(borduresBodies[1], width, height/2, 1.0f, height);
+
+            //Bas
+            InitialisationBordure(borduresBodies[2], width / 2,height, width, 1.0f);
+
+            //Gauche
+            InitialisationBordure(borduresBodies[3], 0.0f, height/2, 1.0f, height);
+            
+        }
+
+        private void InitialisationBordure(Body body, float posx, float posy, float boxWidth, float boxHeight)
+        {
+            BodyDef boundaryDef = new BodyDef();
+            boundaryDef.MassData.I = 0.0f;
+            boundaryDef.MassData.Mass = 0.0f;
+            boundaryDef.Position.Set(posx, posy);
+            body = world.CreateBody(boundaryDef);
+
+            PolygonDef pd = new PolygonDef();
+            pd.SetAsBox(boxWidth, boxHeight);
+            pd.Restitution = 1.0f;
+            body.CreateFixture(pd);
         }
 
         /// <summary>
@@ -129,6 +180,7 @@ namespace AirHockey
 
             newP1Pos = posJ1;
             newP2Pos = posJ2;
+            palet.Pos = paletInitalPos;
         }
 
         /// <summary>
@@ -159,6 +211,9 @@ namespace AirHockey
             world.Step(1.0f / 6.0f, 1, 1);
         }
 
+        /// <summary>
+        /// Fonction qui invalide le canvas et force son redessinage
+        /// </summary>
         private void InvalidateCanvas()
         {
             canvasDessin.Invalidate();
@@ -182,6 +237,11 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Événement qui dessine l'interface de jeu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CanvasDessin_OnPointerMoved(object sender, PointerRoutedEventArgs e)
         {
             double tempX = e.GetCurrentPoint(this).Position.X;
@@ -196,6 +256,12 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Gère le déplcement des poussoirs en fonction du mouvement des doigts
+        /// </summary>
+        /// <param name="joueur"></param>
+        /// <param name="e"></param>
+        /// <param name="numJoueur"></param>
         private void DeplacementPoussoir(PoussoirJoueur joueur,PointerRoutedEventArgs e,int numJoueur)
         {
             float tempX = (float)e.GetCurrentPoint(this).Position.X;
@@ -220,10 +286,17 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Événement qui adapte l'interface en fonction de la taille de la fenêtre
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CanvasDessin_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
             this.width = (float) this.ActualWidth;
             this.height = (float) this.ActualHeight;
+            paletInitalPos = new Vec2(width / 2, height / 2);
+            
         }
     }
 }

@@ -25,15 +25,15 @@ namespace AirHockey
 
             //Body
             BodyDef bd = new BodyDef();
-            bd.MassData.I = 0.0f;
-            bd.MassData.Mass = 0.0f;
+            bd.MassData.I = 1.0f;
+            bd.MassData.Mass = 10.0f;
             bd.Position.Set(posX, posY);
             body = world.CreateBody(bd);
 
             //Shape
             CircleDef cd = new CircleDef();
-            cd.Friction = 0.0f;
-            cd.Restitution = 1.0f;
+            //cd.Friction = 0.0f;
+            //cd.Restitution = 0.0f;
             cd.LocalPosition = Vec2.Zero;
             cd.Radius = RAYON_POUSSOIR;
 
@@ -43,8 +43,8 @@ namespace AirHockey
 
         public void Draw(CanvasDrawingSession canvas)
         {
-            ICanvasBrush poussoirP1Brush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255,127,127,0));
-            canvas.FillEllipse(this.Pos.X, this.Pos.Y, this.Rayon, this.Rayon, poussoirP1Brush);
+            ICanvasBrush poussoirBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255,127,127,0));
+            canvas.FillEllipse(this.Pos.X, this.Pos.Y, this.Rayon, this.Rayon, poussoirBrush);
         }
 
         public Vec2 Pos
