@@ -9,6 +9,6 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <canvas:CanvasControl x:Name="canvasDessin" Draw="CanvasControl_Draw" ClearColor="WhiteSmoke" PointerMoved="CanvasDessin_OnPointerMoved" SizeChanged="CanvasDessin_OnSizeChanged"/>
+        <canvas:CanvasControl x:Name="canvasDessin" Draw="CanvasControl_Draw" ClearColor="WhiteSmoke" PointerMoved="CanvasDessin_OnPointerMoved" PointerPressed="CanvasDessin_OnPointerPressed" SizeChanged="CanvasDessin_OnSizeChanged"/>
     </Grid>
 </Page>

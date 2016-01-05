@@ -21,7 +21,7 @@ namespace AirHockey
         {
 
             BodyDef bd = new BodyDef();
-            bd.MassData.I = 1.0f;
+            bd.MassData.I = 0.0f;
             bd.MassData.Mass = 1.0f;
             bd.Position.Set(posX, posY);
             bd.LinearDamping = 0.0f;
@@ -30,11 +30,12 @@ namespace AirHockey
             //Shape
             CircleDef cd = new CircleDef();
             //cd.Friction = 0.0f;
-            //cd.Restitution = 0.0f;
+            cd.Restitution = 1.0f;
             cd.LocalPosition = Vec2.Zero;
             cd.Radius = RAYON_PALET;
 
             body.CreateFixture(cd);
+            body.GetFixtureList().UserData = "PALET";
 
         }
 
@@ -48,6 +49,12 @@ namespace AirHockey
         {
             ICanvasBrush paletBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255, 5, 5, 5));
             canvas.FillEllipse(this.Pos.X, this.Pos.Y, this.Rayon, this.Rayon, paletBrush);
+        }
+
+        public void ApplyImpulse(Vec2 impulse)
+        {
+            //body.ApplyImpulse(impulse,Vec2.Zero);
+            body.SetLinearVelocity(impulse);
         }
 
         public float Rayon
