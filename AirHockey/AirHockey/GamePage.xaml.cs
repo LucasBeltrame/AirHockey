@@ -1,26 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.System.Threading;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI;
 using Windows.UI.Core;
-using Windows.UI.Input;
-using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-using Windows.UI.Xaml.Shapes;
-using Box2DX;
 using Box2DX.Collision;
 using Box2DX.Common;
 using Box2DX.Dynamics;
@@ -28,6 +11,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Color = Windows.UI.Color;
+using System.Numerics;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -38,7 +22,7 @@ namespace AirHockey
     /// </summary>
     public sealed partial class GamePage : Page
     {
-        //Solution nulle
+        //Empêche un bug
         private bool firstDraw = true;
 
         //Hauteur et largeur de la fenêtre
@@ -71,6 +55,9 @@ namespace AirHockey
         private Vec2 paletInitalPos;
         private Body[] borduresBodies;
         private bool isResized;
+
+        //Constantes
+        private const float FACTEUR_SPEED = 5.0f;
 
 
 
@@ -137,6 +124,27 @@ namespace AirHockey
             }
             args.DrawingSession.DrawEllipse(width/2, height/2,radiusCentralCircle, radiusCentralCircle, Color.FromArgb(255,255,0,0));
 
+            //Demi Cercle P1
+            args.DrawingSession.DrawEllipse(width / 2, height, goalP1.getLargeur() * 0.75f, goalP1.getLargeur() * 0.75f, Color.FromArgb(255, 0, 0, 0));
+            //Demi Cercle P2
+            args.DrawingSession.DrawEllipse(width / 2, 0.0f, goalP1.getLargeur() * 0.75f, goalP1.getLargeur() * 0.75f, Color.FromArgb(255, 0, 0, 0));
+
+            /* Score */
+            float scoreJ1PosX = (width/10)*9;
+            float scoreJ1PosY = (height/10)*1;
+
+            //float scoreJ2PosX = (width / 10) * 1;
+            //float scoreJ2PosY = (height / 10) * 9;
+            float scoreJ2PosX = (width / 10) * 9 - width;
+            float scoreJ2PosY = (height / 10) * 1 - height;
+
+            args.DrawingSession.DrawText(joueur1.Score.ToString(), scoreJ1PosX, scoreJ1PosY, Color.FromArgb(255,0,0,0));
+            // ReSharper disable All
+            args.DrawingSession.Transform = Matrix3x2.CreateRotation(-(float)System.Math.PI);
+            args.DrawingSession.DrawText(joueur2.Score.ToString(), scoreJ2PosX, scoreJ2PosY, Color.FromArgb(255, 0, 0, 0));
+            //args.DrawingSession.DrawText(joueur1.Score.ToString(), scoreJ1PosX, scoreJ1PosY, Color.FromArgb(255, 0, 0, 0));
+            args.DrawingSession.Transform = Matrix3x2.Identity;
+
             /* Palet */
             palet.Draw(args.DrawingSession);
 
@@ -147,6 +155,7 @@ namespace AirHockey
             /* Goal */
             goalP1.Draw(args.DrawingSession);
             goalP2.Draw(args.DrawingSession);
+
 
             /*debug*/
             for (int i = 0; i < borduresBodies.Length; i++)
@@ -259,7 +268,27 @@ namespace AirHockey
             joueur1.ManualMove = true;
             joueur2.ManualMove = true;
             palet.Pos = paletInitalPos;
-            palet.ApplyImpulse(new Vec2(4.0f,2.0f));
+
+            palet.ApplyImpulse(getRandomImpulse());
+        }
+
+        private Vec2 getRandomImpulse()
+        {
+            Random r = new Random();
+            float signeX = 1.0f;
+            float signeY = 1.0f;
+
+            if (r.Next(2) == 1)
+            {
+                signeX *= -1;
+            }
+
+            if (r.Next(2) == 1)
+            {
+                signeY *= -1;
+            }
+
+            return new Vec2((float)r.NextDouble() * FACTEUR_SPEED* signeX, (float)r.NextDouble() * FACTEUR_SPEED * signeY);
         }
 
         /// <summary>
@@ -283,8 +312,10 @@ namespace AirHockey
         /// <summary>
         /// Mise à jour de la logique du jeu
         /// </summary>
-        private void UpdateGame()
+        private async Task UpdateGame()
         {
+            bool doPause = false;
+            checkPlayersInBound();
             if (collisionDetect.PlayerMarked != 0)
             {
                 switch (collisionDetect.PlayerMarked)
@@ -298,6 +329,8 @@ namespace AirHockey
                 }
                 System.Diagnostics.Debug.WriteLine(joueur1.Score + " - " + joueur2.Score);
                 ResetGame();
+                doPause = true;
+
             }
 
             if (joueur1.ManualMove)
@@ -318,10 +351,46 @@ namespace AirHockey
                 goalP2.Pos = new Vec2(width / 2, height - 1.0f);
                 InitialiseBordure();
             }
-
-            world.Step(1.0f / 60.0f, 1, 1);
+            if (doPause)
+            {
+                Task.Delay(3000).Wait();
+            }
+            //1.0f/60.0f
+            world.Step(1.0f / 150.0f, 1, 1);
             joueur1.ApplyForce(Vec2.Zero);
             joueur2.ApplyForce(Vec2.Zero);
+        }
+
+        /// <summary>
+        /// Regarde si le joueur est encore sur l'écran. Si ce n'est pas le cas on le replace à sa position par défaut
+        /// </summary>
+        private void checkPlayersInBound()
+        {
+            if (joueur1.Pos.X < 0 || joueur1.Pos.X > width)
+            {
+                Vec2 posJ1 = new Vec2(width / 2, height - (joueur1.Rayon * 2));
+                newP1Pos = posJ1;
+                joueur1.ManualMove = true;
+            }
+            else if (joueur1.Pos.Y < 0 || joueur1.Pos.Y > height)
+            {
+                Vec2 posJ1 = new Vec2(width / 2, height - (joueur1.Rayon * 2));
+                newP1Pos = posJ1;
+                joueur1.ManualMove = true;
+            }
+
+            if (joueur2.Pos.X < 0 || joueur2.Pos.X > width)
+            {
+                Vec2 posJ2 = new Vec2(width / 2, joueur2.Rayon * 2);
+                newP2Pos = posJ2;
+                joueur2.ManualMove = true;
+            }
+            else if (joueur2.Pos.Y < 0 || joueur2.Pos.Y > height)
+            {
+                Vec2 posJ2 = new Vec2(width / 2, joueur2.Rayon * 2);
+                newP2Pos = posJ2;
+                joueur2.ManualMove = true;
+            }
         }
 
         /// <summary>
@@ -403,10 +472,8 @@ namespace AirHockey
                 if (posY >= joueurAABB.LowerBound.Y && posY <= joueurAABB.UpperBound.Y)
                 {
                     notInPlayer = false;
-                    //Vec2 force = new Vec2(posX - joueur.LastPos.X, posY - joueur.LastPos.Y);
                     Vec2 force = new Vec2(posX - lastMousePos.X, posY - lastMousePos.Y);
-                    //force.Y *= -1.0f;
-                    //force *= 0.005f;
+                    force*=0.5f;
                     joueur.ApplyForce(force);
                     joueur.LastPos = new Vec2(posX,posY);
                     joueur.ManualMove = true;

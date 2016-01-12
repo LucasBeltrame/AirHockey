@@ -16,7 +16,7 @@ namespace AirHockey
     {
         private Body body;
         private int numJoueur;
-        private const float RAYON_POUSSOIR = 50.0f;
+        private const float RAYON_POUSSOIR = 30.0f;
         private Vec2 lastPos;
         private bool manualMovement;
         private int score;

@@ -34,5 +34,10 @@ namespace AirHockey
             //var itemId = new GamePage();
             this.Frame.Navigate(typeof(GamePage), null);
         }
+
+        private void Button_quit_OnClick(object sender, RoutedEventArgs e)
+        {
+           Application.Current.Exit();
+        }
     }
 }

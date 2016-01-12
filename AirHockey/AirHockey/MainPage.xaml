@@ -6,8 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    
+    <!-- <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">-->
+    <Grid Background="LightSkyBlue">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
@@ -18,15 +19,12 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        <Image Source="/Assets/Logo.png" Grid.Row="5" Margin="20"/>
         <CheckBox x:Name="checkBox" Content="CheckBox" HorizontalAlignment="Left" Height="3" Margin="257,1932,0,-1295" VerticalAlignment="Top" Width="43"/>
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="6"/>
-        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="127,152,0,0" VerticalAlignment="Top" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="6" Click="button_Click"/>
+        <Button x:Name="button" Content="Jouer" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Click="button_Click"/>
+        <Button x:Name="button_quit" Content="Quitter" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Click="Button_quit_OnClick"/>
+        <TextBlock x:Name="title" Margin="0" TextWrapping="Wrap" Text="AirHockey" Grid.RowSpan="2" FontFamily="Garamond" FontSize="64" ScrollViewer.VerticalScrollBarVisibility="Disabled" TextAlignment="Center" VerticalAlignment="Center" />
 
     </Grid>
 </Page>

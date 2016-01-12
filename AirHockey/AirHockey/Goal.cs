@@ -16,8 +16,8 @@ namespace AirHockey
     {
         private Body body;
         private int numPlayer;
-        private const float LARGEUR_GOAL = 100.0f;
-        private const float HAUTEUR_GOAL = 1.0f;
+        private const float LARGEUR_GOAL = 150.0f;
+        private const float HAUTEUR_GOAL = 4.0f;
 
         public Goal(World world, float posX, float posY, int num)
         {
@@ -32,7 +32,7 @@ namespace AirHockey
 
             //Shape
             PolygonDef pd = new PolygonDef();
-            pd.SetAsBox(LARGEUR_GOAL, HAUTEUR_GOAL);
+            pd.SetAsBox(LARGEUR_GOAL/2, HAUTEUR_GOAL/2);
             pd.Restitution = 1.0f;
             body.CreateFixture(pd);
             body.GetFixtureList().UserData = "GOALP" + numPlayer.ToString();
@@ -45,9 +45,14 @@ namespace AirHockey
             set { body.SetXForm(value, 0.0f); }
         }
 
+        public float getLargeur()
+        {
+            return LARGEUR_GOAL;
+        }
+
         public void Draw(CanvasDrawingSession canvas)
         {
-            ICanvasBrush goalBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255,0,0,0));
+            ICanvasBrush goalBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255,255,0,0));
             canvas.FillRectangle(this.Pos.X - LARGEUR_GOAL/2,this.Pos.Y - HAUTEUR_GOAL/2, LARGEUR_GOAL,HAUTEUR_GOAL, goalBrush);
         }
     }

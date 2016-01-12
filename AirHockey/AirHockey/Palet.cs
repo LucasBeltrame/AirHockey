@@ -15,7 +15,7 @@ namespace AirHockey
     class Palet
     {
         private Body body;
-        private const float RAYON_PALET = 10.0f;
+        private const float RAYON_PALET = 15.0f;
 
         public Palet(World world, float posX, float posY)
         {
