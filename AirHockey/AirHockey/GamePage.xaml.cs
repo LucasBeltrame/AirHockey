@@ -58,6 +58,9 @@ namespace AirHockey
 
         //Constantes
         private const float FACTEUR_SPEED = 5.0f;
+        private const float FACTEUR_SIZE_JOUEUR = 2.0f/25.0f;
+        private const float FACTEUR_SIZE_PALET = 2.0f / 25.0f;
+        private const float FACTEUR_SIZE_GOAL = 2.0f / 25.0f;
 
 
 
@@ -315,6 +318,11 @@ namespace AirHockey
         private async Task UpdateGame()
         {
             bool doPause = false;
+
+            //Update joueur
+            joueur1.Update();
+            joueur2.Update();
+
             checkPlayersInBound();
             if (collisionDetect.PlayerMarked != 0)
             {
@@ -327,10 +335,13 @@ namespace AirHockey
                         joueur2.Score++;
                         break;
                 }
-                System.Diagnostics.Debug.WriteLine(joueur1.Score + " - " + joueur2.Score);
                 ResetGame();
                 doPause = true;
 
+            }
+            if (palet.Pos.X < 0 || palet.Pos.X > width || palet.Pos.Y < 0 || palet.Pos.Y > height)
+            {
+                palet.Pos = paletInitalPos;
             }
 
             if (joueur1.ManualMove)
@@ -513,8 +524,13 @@ namespace AirHockey
             
             paletInitalPos = new Vec2(width / 2, height / 2);
 
+            //On update la taille des joueurs en fonction de la width
+            joueur1.Rayon = width*FACTEUR_SIZE_JOUEUR;
+            joueur2.Rayon = width*FACTEUR_SIZE_JOUEUR;
+
             //Mise à jour des bordures
             isResized = true;
+            System.Diagnostics.Debug.WriteLine(width);
 
         }
 

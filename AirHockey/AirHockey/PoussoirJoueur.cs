@@ -16,16 +16,19 @@ namespace AirHockey
     {
         private Body body;
         private int numJoueur;
-        private const float RAYON_POUSSOIR = 30.0f;
+        private float rayonPoussoir;
         private Vec2 lastPos;
         private bool manualMovement;
         private int score;
+        private bool doUpdate;
 
 
-        public PoussoirJoueur(World world, float posX, float posY, int num)
+        public PoussoirJoueur(World world, float posX, float posY, int num, float rayon = 40.0f)
         {
+            doUpdate = false;
             numJoueur = num;
             lastPos = new Vec2(posX,posY);
+            this.rayonPoussoir = rayon;
             manualMovement = true;
             score = 0;
 
@@ -36,13 +39,30 @@ namespace AirHockey
             bd.Position.Set(posX, posY);
             body = world.CreateBody(bd);
 
+            //Fixture
+            CreateFixture();
+        }
+
+        private void CreateFixture()
+        {
             //Shape
             CircleDef cd = new CircleDef();
             cd.LocalPosition = Vec2.Zero;
             cd.Restitution = 1.0f;
-            cd.Radius = RAYON_POUSSOIR;
+            cd.Radius = rayonPoussoir;
 
             body.CreateFixture(cd);
+        }
+
+        public void Update()
+        {
+            if (doUpdate)
+            {
+                body.DestroyFixture(body.GetFixtureList());
+                CreateFixture();
+                doUpdate = false;
+            }
+
         }
 
         public void Draw(CanvasDrawingSession canvas)
@@ -54,7 +74,6 @@ namespace AirHockey
         public void ApplyForce(Vec2 force)
         {
             body.SetLinearVelocity(force);
-            //body.ApplyImpulse(force,Vec2.Zero);
         }
 
         public Vec2 Pos
@@ -73,7 +92,12 @@ namespace AirHockey
         {
             get
             {
-                return RAYON_POUSSOIR;
+                return rayonPoussoir;
+            }
+            set
+            {
+                rayonPoussoir = value;
+                doUpdate = true;
             }
         }
 
