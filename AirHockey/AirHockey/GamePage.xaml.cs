@@ -12,6 +12,8 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Color = Windows.UI.Color;
 using System.Numerics;
+using Windows.Foundation;
+using Microsoft.Graphics.Canvas.Text;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -55,6 +57,7 @@ namespace AirHockey
         private Vec2 paletInitalPos;
         private Body[] borduresBodies;
         private bool isResized;
+        private CanvasBitmap imageHeArc;
 
         //Constantes
         private const float FACTEUR_SPEED = 5.0f;
@@ -70,6 +73,8 @@ namespace AirHockey
         public GamePage()
         {
             this.InitializeComponent();
+            //On charge l'image une fois
+            imageHeArc = null;
             width = 400.0f;
             height = 800.0f;
 
@@ -104,6 +109,11 @@ namespace AirHockey
             executionTask.Start();
             
         }
+
+        private async void loadImage(CanvasControl canvas)
+        {
+            imageHeArc = await CanvasBitmap.LoadAsync(canvas, "Assets/logo.png");
+        }
         
         /// <summary>
         /// Dessin du jeu dans le canvas
@@ -112,6 +122,11 @@ namespace AirHockey
         /// <param name="args"></param>
         void CanvasControl_Draw(CanvasControl sender, CanvasDrawEventArgs args)
         {
+//            if (imageHeArc == null)
+//            {
+//                loadImage(sender);
+//            }
+
             /* TERRAIN */
             //Ligne centrale
             args.DrawingSession.DrawLine(0.0f,height/2,width,height/2,Color.FromArgb(255,0,0,0));
@@ -126,26 +141,37 @@ namespace AirHockey
                 radiusCentralCircle = height/4;
             }
             args.DrawingSession.DrawEllipse(width/2, height/2,radiusCentralCircle, radiusCentralCircle, Color.FromArgb(255,255,0,0));
+           
+            //Logo
+//            if (imageHeArc != null)
+//            {
+//                Rect finalRect = new Rect(width/2.0f - radiusCentralCircle, height/2.0f - imageHeArc.Bounds.Height/4.0f, 2 * radiusCentralCircle, (2 * radiusCentralCircle) / (imageHeArc.Bounds.Width / imageHeArc.Bounds.Height));
+//                args.DrawingSession.DrawImage(imageHeArc, finalRect, imageHeArc.Bounds,0.5f);
+//            }
 
+            //Sera vilain sur un écran mis en position landscape ! 
             //Demi Cercle P1
-            args.DrawingSession.DrawEllipse(width / 2, height, goalP1.getLargeur() * 0.75f, goalP1.getLargeur() * 0.75f, Color.FromArgb(255, 0, 0, 0));
+            args.DrawingSession.DrawEllipse(width / 2, height, goalP1.LargeurGoal * 0.75f, goalP1.LargeurGoal * 0.75f, Color.FromArgb(255, 0, 0, 0));
             //Demi Cercle P2
-            args.DrawingSession.DrawEllipse(width / 2, 0.0f, goalP1.getLargeur() * 0.75f, goalP1.getLargeur() * 0.75f, Color.FromArgb(255, 0, 0, 0));
+            args.DrawingSession.DrawEllipse(width / 2, 0.0f, goalP1.LargeurGoal * 0.75f, goalP1.LargeurGoal * 0.75f, Color.FromArgb(255, 0, 0, 0));
 
             /* Score */
-            float scoreJ1PosX = (width/10)*9;
-            float scoreJ1PosY = (height/10)*1;
+            float scoreJ1PosX = (width/10)*1;
+            float scoreJ1PosY = (height/10)*9;
 
-            //float scoreJ2PosX = (width / 10) * 1;
-            //float scoreJ2PosY = (height / 10) * 9;
-            float scoreJ2PosX = (width / 10) * 9 - width;
-            float scoreJ2PosY = (height / 10) * 1 - height;
+            float scoreJ2PosX = (width / 10) * 1 - width;
+            float scoreJ2PosY = (height / 10) * 9 - height;
 
-            args.DrawingSession.DrawText(joueur1.Score.ToString(), scoreJ1PosX, scoreJ1PosY, Color.FromArgb(255,0,0,0));
+            //Font and stuff
+            CanvasTextFormat ctf = new CanvasTextFormat();
+            ctf.FontFamily = "Segoe MDL2";
+            ctf.FontSize = 60.0f;
+            Color textColor = Color.FromArgb(150, 0, 0, 0);
+
+            args.DrawingSession.DrawText(joueur1.Score.ToString(), scoreJ1PosX, scoreJ1PosY, textColor, ctf);
             // ReSharper disable All
-            args.DrawingSession.Transform = Matrix3x2.CreateRotation(-(float)System.Math.PI);
-            args.DrawingSession.DrawText(joueur2.Score.ToString(), scoreJ2PosX, scoreJ2PosY, Color.FromArgb(255, 0, 0, 0));
-            //args.DrawingSession.DrawText(joueur1.Score.ToString(), scoreJ1PosX, scoreJ1PosY, Color.FromArgb(255, 0, 0, 0));
+            args.DrawingSession.Transform = Matrix3x2.CreateRotation((float)System.Math.PI);
+            args.DrawingSession.DrawText(joueur2.Score.ToString(), scoreJ2PosX, scoreJ2PosY, textColor, ctf);
             args.DrawingSession.Transform = Matrix3x2.Identity;
 
             /* Palet */
@@ -254,7 +280,7 @@ namespace AirHockey
 
             PolygonDef pd = new PolygonDef();
             pd.SetAsBox(boxWidth, boxHeight);
-            pd.Restitution = 1.0f;
+            pd.Restitution = 0.9f;
             body.CreateFixture(pd);
         }
 
@@ -323,16 +349,23 @@ namespace AirHockey
             joueur1.Update();
             joueur2.Update();
 
+            //Update goal
+            goalP1.Update();
+            goalP2.Update();
+
+            //Update Palet
+            palet.Update();
+
             checkPlayersInBound();
             if (collisionDetect.PlayerMarked != 0)
             {
                 switch (collisionDetect.PlayerMarked)
                 {
                     case 1:
-                        joueur1.Score++;
+                        joueur2.Score++;
                         break;
                     case 2:
-                        joueur2.Score++;
+                        joueur1.Score++;
                         break;
                 }
                 ResetGame();
@@ -367,7 +400,7 @@ namespace AirHockey
                 Task.Delay(3000).Wait();
             }
             //1.0f/60.0f
-            world.Step(1.0f / 150.0f, 1, 1);
+            world.Step(1.0f / 500.0f, 1, 1);
             joueur1.ApplyForce(Vec2.Zero);
             joueur2.ApplyForce(Vec2.Zero);
         }
@@ -527,6 +560,18 @@ namespace AirHockey
             //On update la taille des joueurs en fonction de la width
             joueur1.Rayon = width*FACTEUR_SIZE_JOUEUR;
             joueur2.Rayon = width*FACTEUR_SIZE_JOUEUR;
+            goalP1.LargeurGoal = (width/100.0f)*30.0f;
+            goalP2.LargeurGoal = (width / 100.0f) * 30.0f;
+
+            //Défini au cas où l'application ne serait pas en mode portrait
+            if (width > height)
+            {
+                joueur1.Rayon = height*FACTEUR_SIZE_JOUEUR;
+                joueur2.Rayon = height*FACTEUR_SIZE_JOUEUR;
+            }
+
+            //On défini la taille du palet en fonction de la taille des joueurs
+            palet.Rayon = joueur1.Rayon/2.0f;
 
             //Mise à jour des bordures
             isResized = true;

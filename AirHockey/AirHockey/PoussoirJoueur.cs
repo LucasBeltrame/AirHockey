@@ -67,7 +67,7 @@ namespace AirHockey
 
         public void Draw(CanvasDrawingSession canvas)
         {
-            ICanvasBrush poussoirBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255,127,127,0));
+            ICanvasBrush poussoirBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255, 146, 4, 14));
             canvas.FillEllipse(this.Pos.X, this.Pos.Y, this.Rayon, this.Rayon, poussoirBrush);
         }
 

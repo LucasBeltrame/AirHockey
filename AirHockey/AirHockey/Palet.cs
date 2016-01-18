@@ -15,28 +15,43 @@ namespace AirHockey
     class Palet
     {
         private Body body;
-        private const float RAYON_PALET = 15.0f;
+        private float rayonPalet;
+        private bool doUpdate;
 
-        public Palet(World world, float posX, float posY)
+        public Palet(World world, float posX, float posY, float rayon = 15.0f)
         {
-
+            rayonPalet = rayon;
             BodyDef bd = new BodyDef();
             bd.MassData.I = 0.0f;
             bd.MassData.Mass = 1.0f;
             bd.Position.Set(posX, posY);
             bd.LinearDamping = 0.0f;
             body = world.CreateBody(bd);
+            CreateFixture();
 
+        }
+
+        private void CreateFixture()
+        {
             //Shape
             CircleDef cd = new CircleDef();
             //cd.Friction = 0.0f;
             cd.Restitution = 1.0f;
             cd.LocalPosition = Vec2.Zero;
-            cd.Radius = RAYON_PALET;
+            cd.Radius = rayonPalet;
 
             body.CreateFixture(cd);
             body.GetFixtureList().UserData = "PALET";
+        }
 
+        public void Update()
+        {
+            if (doUpdate)
+            {
+                body.DestroyFixture(body.GetFixtureList());
+                CreateFixture();
+                doUpdate = false;
+            }
         }
 
         public Vec2 Pos
@@ -53,7 +68,6 @@ namespace AirHockey
 
         public void ApplyImpulse(Vec2 impulse)
         {
-            //body.ApplyImpulse(impulse,Vec2.Zero);
             body.SetLinearVelocity(impulse);
         }
 
@@ -61,7 +75,12 @@ namespace AirHockey
         {
             get
             {
-                return RAYON_PALET;
+                return rayonPalet;
+            }
+            set
+            {
+                rayonPalet = value;
+                doUpdate = true;
             }
         }
 
