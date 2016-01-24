@@ -57,13 +57,16 @@ namespace AirHockey
         private Vec2 paletInitalPos;
         private Body[] borduresBodies;
         private bool isResized;
-        private CanvasBitmap imageHeArc;
+        private bool showWait;
+        private int playerWin;
+        private bool somebodyWins;
 
         //Constantes
         private const float FACTEUR_SPEED = 5.0f;
         private const float FACTEUR_SIZE_JOUEUR = 2.0f/25.0f;
         private const float FACTEUR_SIZE_PALET = 2.0f / 25.0f;
         private const float FACTEUR_SIZE_GOAL = 2.0f / 25.0f;
+        private const int SCORE_VICTOIRE = 10;
 
 
 
@@ -74,10 +77,11 @@ namespace AirHockey
         {
             this.InitializeComponent();
             //On charge l'image une fois
-            imageHeArc = null;
             width = 400.0f;
             height = 800.0f;
-
+            showWait = false;
+            somebodyWins = false;
+            playerWin = 0;
             isResized = true;
             borduresBodies = new Body[4];
 
@@ -109,11 +113,6 @@ namespace AirHockey
             executionTask.Start();
             
         }
-
-        private async void loadImage(CanvasControl canvas)
-        {
-            imageHeArc = await CanvasBitmap.LoadAsync(canvas, "Assets/logo.png");
-        }
         
         /// <summary>
         /// Dessin du jeu dans le canvas
@@ -122,10 +121,6 @@ namespace AirHockey
         /// <param name="args"></param>
         void CanvasControl_Draw(CanvasControl sender, CanvasDrawEventArgs args)
         {
-//            if (imageHeArc == null)
-//            {
-//                loadImage(sender);
-//            }
 
             /* TERRAIN */
             //Ligne centrale
@@ -141,13 +136,6 @@ namespace AirHockey
                 radiusCentralCircle = height/4;
             }
             args.DrawingSession.DrawEllipse(width/2, height/2,radiusCentralCircle, radiusCentralCircle, Color.FromArgb(255,255,0,0));
-           
-            //Logo
-//            if (imageHeArc != null)
-//            {
-//                Rect finalRect = new Rect(width/2.0f - radiusCentralCircle, height/2.0f - imageHeArc.Bounds.Height/4.0f, 2 * radiusCentralCircle, (2 * radiusCentralCircle) / (imageHeArc.Bounds.Width / imageHeArc.Bounds.Height));
-//                args.DrawingSession.DrawImage(imageHeArc, finalRect, imageHeArc.Bounds,0.5f);
-//            }
 
             //Sera vilain sur un écran mis en position landscape ! 
             //Demi Cercle P1
@@ -187,13 +175,37 @@ namespace AirHockey
 
 
             /*debug*/
+            /*
             for (int i = 0; i < borduresBodies.Length; i++)
             {
                 DrawWallDebug(args.DrawingSession, i);
             }
+            */
+
+            if (showWait)
+            {
+                showWait = !showWait;
+                float textHeight = (width/10.0f) * 3.0f;
+                CanvasTextFormat ctfWait = new CanvasTextFormat();
+                ctfWait.FontSize = textHeight/2;
+                args.DrawingSession.DrawText("Get Ready...", 0, height/2.0f - textHeight/2.0f, Color.FromArgb(255,0,0,0), ctfWait);
+            }
+
+            if (somebodyWins)
+            {
+                float textHeight = (width / 10.0f) * 2.0f;
+                CanvasTextFormat ctfWait = new CanvasTextFormat();
+                ctfWait.FontSize = textHeight / 2;
+                args.DrawingSession.DrawText("Le joueur " + playerWin.ToString() + " a gagné !", 0, height / 2.0f - textHeight / 2.0f, Color.FromArgb(255, 0, 0, 0), ctfWait);
+            }
             
         }
 
+        /// <summary>
+        /// Dessine les bordures du terrain
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <param name="index"></param>
         private void DrawWallDebug(CanvasDrawingSession canvas, int index)
         {
             try
@@ -301,6 +313,10 @@ namespace AirHockey
             palet.ApplyImpulse(getRandomImpulse());
         }
 
+        /// <summary>
+        /// Crée un vecteur 2 qui représente une impulsion aléatoire
+        /// </summary>
+        /// <returns></returns>
         private Vec2 getRandomImpulse()
         {
             Random r = new Random();
@@ -363,10 +379,16 @@ namespace AirHockey
                 {
                     case 1:
                         joueur2.Score++;
+                        playerWin = (joueur2.Score == SCORE_VICTOIRE) ? joueur2.NumJoueur : 0;
                         break;
                     case 2:
                         joueur1.Score++;
+                        playerWin = (joueur1.Score == SCORE_VICTOIRE) ? joueur1.NumJoueur : 0;
                         break;
+                }
+                if (playerWin != 0)
+                {
+                    somebodyWins = true;
                 }
                 ResetGame();
                 doPause = true;
@@ -395,12 +417,22 @@ namespace AirHockey
                 goalP2.Pos = new Vec2(width / 2, height - 1.0f);
                 InitialiseBordure();
             }
+            if (somebodyWins)
+            {
+                doPause = false;
+                DrawGame();
+                Task.Delay(3000).Wait();
+                isRunning = false;
+                RetourMenu();
+            }
             if (doPause)
             {
+                showWait = true;
+                DrawGame();
                 Task.Delay(3000).Wait();
             }
-            //1.0f/60.0f
-            world.Step(1.0f / 500.0f, 1, 1);
+
+            world.Step(1.0f / 450.0f, 1, 1);
             joueur1.ApplyForce(Vec2.Zero);
             joueur2.ApplyForce(Vec2.Zero);
         }
@@ -443,6 +475,28 @@ namespace AirHockey
         private void InvalidateCanvas()
         {
             canvasDessin.Invalidate();
+        }
+
+        /// <summary>
+        /// Permet de revenir à la page précédente
+        /// </summary>
+        private void GoBack()
+        {
+            this.Frame.Navigate(typeof(MainPage), null);
+        }
+
+        async private void RetourMenu()
+        {
+            try
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { GoBack(); });
+
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                throw;
+            }
         }
 
 
