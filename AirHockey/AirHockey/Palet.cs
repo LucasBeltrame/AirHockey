@@ -12,12 +12,22 @@ using Color = Windows.UI.Color;
 
 namespace AirHockey
 {
+    /// <summary>
+    /// Représente le palet de jeu
+    /// </summary>
     class Palet
     {
         private Body body;
         private float rayonPalet;
         private bool doUpdate;
 
+        /// <summary>
+        /// Constructeur
+        /// </summary>
+        /// <param name="world"></param>
+        /// <param name="posX"></param>
+        /// <param name="posY"></param>
+        /// <param name="rayon"></param>
         public Palet(World world, float posX, float posY, float rayon = 15.0f)
         {
             rayonPalet = rayon;
@@ -31,6 +41,9 @@ namespace AirHockey
 
         }
 
+        /// <summary>
+        /// Crée la fixture, qui assure la solidité de l'objet
+        /// </summary>
         private void CreateFixture()
         {
             //Shape
@@ -44,6 +57,9 @@ namespace AirHockey
             body.GetFixtureList().UserData = "PALET";
         }
 
+        /// <summary>
+        /// Met à jour le palet
+        /// </summary>
         public void Update()
         {
             if (doUpdate)
@@ -54,23 +70,37 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Position du palet
+        /// </summary>
         public Vec2 Pos
         {
             get { return body.GetPosition(); }
             set { body.SetXForm(value, 0.0f); }
         }
 
+        /// <summary>
+        /// Dessine le palet
+        /// </summary>
+        /// <param name="canvas"></param>
         public void Draw(CanvasDrawingSession canvas)
         {
             ICanvasBrush paletBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255, 5, 5, 5));
             canvas.FillEllipse(this.Pos.X, this.Pos.Y, this.Rayon, this.Rayon, paletBrush);
         }
 
+        /// <summary>
+        /// Applique une impulsion au palet
+        /// </summary>
+        /// <param name="impulse"></param>
         public void ApplyImpulse(Vec2 impulse)
         {
             body.SetLinearVelocity(impulse);
         }
 
+        /// <summary>
+        /// Rayon du palet
+        /// </summary>
         public float Rayon
         {
             get
@@ -84,6 +114,10 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Retourne le contour du palet
+        /// </summary>
+        /// <returns></returns>
         public AABB getAABB()
         {
             AABB retour = new AABB();

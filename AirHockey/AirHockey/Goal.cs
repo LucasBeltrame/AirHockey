@@ -12,6 +12,9 @@ using Color = Windows.UI.Color;
 
 namespace AirHockey
 {
+    /// <summary>
+    /// But sur le terrain
+    /// </summary>
     class Goal
     {
         private Body body;
@@ -20,6 +23,14 @@ namespace AirHockey
         private const float HAUTEUR_GOAL = 4.0f;
         private bool doUpdate;
 
+        /// <summary>
+        /// Constructeur
+        /// </summary>
+        /// <param name="world"></param>
+        /// <param name="posX"></param>
+        /// <param name="posY"></param>
+        /// <param name="num"></param>
+        /// <param name="largeur"></param>
         public Goal(World world, float posX, float posY, int num, float largeur = 150.0f)
         {
             numPlayer = num;
@@ -36,6 +47,9 @@ namespace AirHockey
 
         }
 
+        /// <summary>
+        /// Crée la fixture, qui assure la solidité de l'objet
+        /// </summary>
         private void CreateFixture()
         {
             //Shape
@@ -46,6 +60,9 @@ namespace AirHockey
             body.GetFixtureList().UserData = "GOALP" + numPlayer.ToString();
         }
 
+        /// <summary>
+        /// Met à jour le but
+        /// </summary>
         public void Update()
         {
             if (doUpdate)
@@ -56,12 +73,18 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Position du but
+        /// </summary>
         public Vec2 Pos
         {
             get { return body.GetPosition(); }
             set { body.SetXForm(value, 0.0f); }
         }
 
+        /// <summary>
+        /// Largeur du but
+        /// </summary>
         public float LargeurGoal
         {
             get {return largeurGoal; }
@@ -72,6 +95,10 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Dessine le but
+        /// </summary>
+        /// <param name="canvas"></param>
         public void Draw(CanvasDrawingSession canvas)
         {
             ICanvasBrush goalBrush = new CanvasSolidColorBrush(canvas, Color.FromArgb(255,255,0,0));

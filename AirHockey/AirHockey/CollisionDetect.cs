@@ -9,6 +9,9 @@ using Box2DX.Dynamics;
 
 namespace AirHockey
 {
+    /// <summary>
+    /// Gère la collision à l'aide de l'inteface ContactListener de BOX2DX
+    /// </summary>
     class CollisionDetect : ContactListener
     {
         private int playerMarked;
@@ -20,6 +23,10 @@ namespace AirHockey
             goodCollideHappend = true;
         }
 
+        /// <summary>
+        /// Déclenché lors du début d'un contact entre deux objets
+        /// </summary>
+        /// <param name="contact"></param>
         public void BeginContact(Contact contact)
         {
             if (contact.FixtureA.UserData != null && contact.FixtureB.UserData != null)
@@ -39,6 +46,10 @@ namespace AirHockey
             
         }
 
+        /// <summary>
+        /// Fonction vérifiant que ce sont les objets qui nous intéresse qui se touche
+        /// </summary>
+        /// <param name="Goal"></param>
         private void CheckCollide(String Goal)
         {
             if (Goal.Equals("GOALP1"))
@@ -53,6 +64,10 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Fin du contact
+        /// </summary>
+        /// <param name="contact"></param>
         public void EndContact(Contact contact)
         {
             playerMarked = 0;
@@ -63,16 +78,29 @@ namespace AirHockey
             }
         }
 
+        /// <summary>
+        /// Non implémentée
+        /// </summary>
+        /// <param name="contact"></param>
+        /// <param name="impulse"></param>
         public void PostSolve(Contact contact, ContactImpulse impulse)
         {
             
         }
 
+        /// <summary>
+        /// Non implémentée
+        /// </summary>
+        /// <param name="contact"></param>
+        /// <param name="oldManifold"></param>
         public void PreSolve(Contact contact, Manifold oldManifold)
         {
             
         }
 
+        /// <summary>
+        /// Retourne le joueur qui a marqué
+        /// </summary>
         public int PlayerMarked
         {
             get { return playerMarked;}

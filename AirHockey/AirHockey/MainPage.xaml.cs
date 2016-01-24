@@ -22,12 +22,20 @@ namespace AirHockey
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        /// <summary>
+        /// Constructeur
+        /// </summary>
         public MainPage()
         {
             this.InitializeComponent();
             
         }
 
+        /// <summary>
+        /// Lance la partie
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Click(object sender, RoutedEventArgs e)
         {
             // Navigate to the appropriate destination page, configuring the new page
@@ -36,6 +44,11 @@ namespace AirHockey
             this.Frame.Navigate(typeof(GamePage), null);
         }
 
+        /// <summary>
+        /// Quitte l'application
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_quit_OnClick(object sender, RoutedEventArgs e)
         {
            Application.Current.Exit();
